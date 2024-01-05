@@ -47,14 +47,17 @@ def main():
     target_transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Resize((512, 512))])
-
+    # data_transform = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.Resize((32, 32))])
+    # target_transform = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.Resize((32, 32))])
     merge_small_items = False
     remove_small_items = False
 
-    
- 
     batch_size = 2
-    epochs = 10
+    epochs = 50
     
     loss = ["Pixel-Wise Cross-Entropy", "Focal Loss"]
     metrics = ["Mean Pixel Acc", "Mean IoU", "DICE"]
@@ -75,7 +78,7 @@ def main():
     in_channel = dataset.__getitem__(0)[0].shape[0]
     model_name = "U-Net"
     builtin = False
-    file_name = "U-Net"
+    file_name = "delete-U-Net"
     # model_name =  fcn_resnet50(num_classes=in_channel, progress=False)
     for lr in learing_rate:
         for l in loss:
@@ -115,16 +118,16 @@ def main():
             checkpoint = torch.load(PATH)
             model.load_state_dict(checkpoint['model_state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            epoch = checkpoint['epoch']        
-            loss = checkpoint['loss']
+            epoch_info = checkpoint['epoch']        
+            loss_info = checkpoint['loss']
 
-            # print("Model's state_dict:")
-            # for param_tensor in model.state_dict():
-            #     print(param_tensor, "\t", model.state_dict()[param_tensor].size())
+            print("Model's state_dict:")
+            for param_tensor in model.state_dict():
+                print(param_tensor, "\t", model.state_dict()[param_tensor].size())
 
-            # print("Optimizer's state_dict:")
-            # for var_name in optimizer.state_dict():
-            #     print(var_name, "\t", optimizer.state_dict()[var_name])
+            print("Optimizer's state_dict:")
+            for var_name in optimizer.state_dict():
+                print(var_name, "\t", optimizer.state_dict()[var_name])
 
 
             model.training = False
@@ -134,9 +137,9 @@ def main():
             pred = model(input_img.unsqueeze(0))
             if isinstance(pred, dict):
                 pred = pred["out"]
-            print(input_img.shape)
-            print(pred.shape)
-            print(target.shape)
+            # print(input_img.shape)
+            # print(pred.shape)
+            # print(target.shape)
             # exit(1)
             output = torch.argmax(pred, dim=1)
             output = output.squeeze(0,1)

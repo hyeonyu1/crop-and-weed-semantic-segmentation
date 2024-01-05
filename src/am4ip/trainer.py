@@ -87,7 +87,7 @@ class BaselineTrainer:
 
                 print(f"\r{i+1}/{len(train_data_loader)}: loss = {loss / n_batch}", end='')
             
-            
+
             logger.write(f"Avg loss = {avg_loss/(len(train_data_loader))}\n")
 #       
             eval_acc = self.eval(val_data_loader, metrics, name)
@@ -112,7 +112,6 @@ class BaselineTrainer:
                 logger_name = m.name.replace(" ","_")
                 logger = open(f'./metrics/{name}_{logger_name}.txt', 'a')
                 logger.write(f"{scores[i]}\n")
-                print("saved")
         self.model.training = True
 
         return scores
