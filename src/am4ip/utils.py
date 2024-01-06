@@ -24,6 +24,26 @@ class BestModelChecker():
                 'loss': criterion,
                 }, f'model/{name}.pth')
             
+
+class EarlyStopper:
+    def __init__(self, patience=1, min_delta=0):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.wait = 0
+        self.min_val_loss = float('inf')
+
+    def check(self, val_loss):
+        if val_loss < self.min_val_loss:
+            self.min_val_loss = val_loss
+            self.wait = 0
+        elif val_loss > (self.min_val_loss + self.min_delta):
+            self.wait += 1
+            if self.wait >= self.patience:
+                return True
+       
+        return False
+    
+
 def seperateTarget(input, target, use_cuda):
 
     b,c,h,w = input.size()

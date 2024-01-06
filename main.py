@@ -56,8 +56,8 @@ def main():
     merge_small_items = False
     remove_small_items = False
 
-    batch_size = 2
-    epochs = 50
+    batch_size = 8
+    epochs = 20
     
     loss = ["Pixel-Wise Cross-Entropy", "Focal Loss"]
     metrics = ["Mean Pixel Acc", "Mean IoU", "DICE"]
@@ -78,7 +78,7 @@ def main():
     in_channel = dataset.__getitem__(0)[0].shape[0]
     model_name = "U-Net"
     builtin = False
-    file_name = "delete-U-Net"
+    file_name = "U-Net"
     # model_name =  fcn_resnet50(num_classes=in_channel, progress=False)
     for lr in learing_rate:
         for l in loss:
@@ -125,9 +125,9 @@ def main():
             for param_tensor in model.state_dict():
                 print(param_tensor, "\t", model.state_dict()[param_tensor].size())
 
-            print("Optimizer's state_dict:")
-            for var_name in optimizer.state_dict():
-                print(var_name, "\t", optimizer.state_dict()[var_name])
+            # print("Optimizer's state_dict:")
+            # for var_name in optimizer.state_dict():
+            #     print(var_name, "\t", optimizer.state_dict()[var_name])
 
 
             model.training = False

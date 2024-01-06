@@ -9,7 +9,7 @@ import torch
 from torch import Tensor
 import torch.nn.functional as F
 from .metrics import Metric
-from .utils import BestModelChecker
+from .utils import BestModelChecker, EarlyStopper
 
 def dice_coeff(input: Tensor, target: Tensor, reduce_batch_first: bool = False, epsilon: float = 1e-6):
     # Average of Dice coefficient for all batches, or for a single mask
@@ -45,6 +45,7 @@ class BaselineTrainer:
         self.use_cuda = use_cuda
         self.optimizer = optimizer
         self.best_model_checker = BestModelChecker()
+        self.early_stopper = EarlyStopper(patience=5,min_delta=1e-6)
         if use_cuda:
             self.model = model.to(device="cuda:0")
 
@@ -87,6 +88,10 @@ class BaselineTrainer:
 
                 print(f"\r{i+1}/{len(train_data_loader)}: loss = {loss / n_batch}", end='')
             
+                # avg_loss=1
+            if self.early_stopper.check(0.01):
+                print(f"\nEarly stoppage")
+                break
 
             logger.write(f"Avg loss = {avg_loss/(len(train_data_loader))}\n")
 #       
