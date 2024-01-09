@@ -89,11 +89,12 @@ class BaselineTrainer:
                 print(f"\r{i+1}/{len(train_data_loader)}: loss = {loss / n_batch}", end='')
             
                 # avg_loss=1
+            logger.write(f"Avg loss = {avg_loss/(len(train_data_loader))}\n")
+
             if self.early_stopper.check(0.01):
                 print(f"\nEarly stoppage")
                 break
 
-            logger.write(f"Avg loss = {avg_loss/(len(train_data_loader))}\n")
 #       
             eval_acc = self.eval(val_data_loader, metrics, name)
             print(f"Metrics: {eval_acc}")

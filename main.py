@@ -56,7 +56,7 @@ def main():
     merge_small_items = False
     remove_small_items = False
 
-    batch_size = 8
+    batch_size = 6
     epochs = 20
     
     loss = ["Pixel-Wise Cross-Entropy", "Focal Loss"]
