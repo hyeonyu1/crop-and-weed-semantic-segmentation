@@ -55,3 +55,4 @@ backbone = 'resnet50'
 The model_name can be "U-Net", "DeepLabV3", and "FCN".
 
 When the code is run, it will first return the information of the model's state, followed by the optizer's state, and the metric score. 
+The best model .pth can be found at https://drive.google.com/file/d/1V458TDD5f98Y5ZWsDzvLdMGJHXHQmuho/view?usp=sharing. Make sure to unzip the file in the base. 
