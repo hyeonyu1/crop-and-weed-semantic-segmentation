@@ -4,8 +4,10 @@ from glob import glob
 from PIL import Image
 from torch.utils.data import Dataset
 from typing import Optional, Callable
-
+import cv2
 from .utils import expanded_join
+import matplotlib.pyplot as plt
+from torchvision import transforms
 
 
 class CropSegmentationDataset(Dataset):
@@ -15,6 +17,7 @@ class CropSegmentationDataset(Dataset):
                     2: "weed",
                     3: "partial-crop",
                     4: "partial-weed"}
+    
     cls2id: dict = {"background": 0,
                     "crop": 1,
                     "weed": 2,
@@ -59,7 +62,9 @@ class CropSegmentationDataset(Dataset):
     def __getitem__(self, index: int):
         input_img = Image.open(self.images[index], "r")
         target = Image.open(self.labels[index], "r")
-        
+
+        before_img = np.array(input_img)
+        before_target = np.array(target)
         if self.transform is not None:
             input_img = self.transform(input_img)
         
@@ -73,6 +78,33 @@ class CropSegmentationDataset(Dataset):
             target[target == self.cls2id["partial-crop"]] = self.cls2id["background"]
             target[target == self.cls2id["partial-weed"]] = self.cls2id["background"]
 
+       
+
+        # opencv_input_img = cv2.cvtColor(before_img, cv2.COLOR_RGB2BGR)
+        # input_img = np.array(cv2.bilateralFilter(opencv_input_img, 11, 0.4, 5))
+        # input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
+        # # target = cv2.bilateralFilter(before_target.astype(np.float32), 11, 0.4, 5)
+        
+        
+        # back_to_tensor = transforms.ToTensor()
+        # input_img = back_to_tensor(input_img)
+        # # target = back_to_tensor(target)
+
+        # ax = plt.subplot(1, 2, 1)
+        # ax.imshow(before_img)
+        # ax.axis('off')
+        # ax = plt.subplot(1, 2, 2)
+        # ax.imshow(np.array(input_img.permute(1, 2, 0) ))
+        # ax.axis('off')
+        # ax = plt.subplot(2, 2, 3)
+        # ax.imshow(np.array(before_target)*60, cmap="gray")
+        # ax.axis('off')
+        # ax = plt.subplot(2, 2, 4)
+        # ax.imshow(np.array(np.array(target).squeeze(0))*60, cmap="gray")
+        # ax.axis('off')
+        # plt.subplots_adjust(wspace=0, hspace=0)
+        # plt.savefig(f'EDA/noise_injection{index}_ex.png')
+        # ToTensor()
         return input_img, target
 
     def get_class_number(self):

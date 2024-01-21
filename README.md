@@ -1,39 +1,57 @@
-# Advanced Methods for Image Processing - Lab 3
+# Advanced Methods for Image Processing
 
 ## Introduction
-This is the code repository for the third lab on Image Denoising
+This is the code repository for the Image Processing Project Weed and Crop Segmentation.
 
-Gitlab pages are automatically generated from this repository, and include:
-- The lab instructions
-- A documentation of the API (generated from the docstrings)
-
-Refer to [this page](https://gitlab.com/am4ip/am4ip-lab3) to access to the lab instructions. To configure
-your environment, please refer to the [Installation](#installation) section.
+To configure your environment, please refer to the [Installation](#installation) section.
 
 
 ## Installation
 An environment with a pre-configured Python + Torch installation using GPUs is available. Please follow
 [this link.](https://dept-info.labri.fr/~mansenca/public/CREMI_deeplearning_env.pdf)
 
-Then, you have to add the [src](src) folder to your python path, so it can find the given API. In Linux
-it is done by running the following command, after replacing with the correct path (e.g., using pwd command
-in src folder): 
-```bash
-export PYTHONPATH = $PYTHONPATH:/absolute/path/to/src
-```
-Note that this should be done everytime if you are running scripts in a terminal.
 
-In a Jupyter Notebook (and even in a script), it can be done manually as follows:
+## Checking model
+To check the model and running on a private test, there is a eval.py script:
+```
+python eval.py
+```
+To change the dataset, please change the set_type in  line 35 in the code to the desired type:
 ```python
-import sys
-sys.path.append("/absolute/path/to/src")
+data_loader = ds.CropSegmentationDataset(
+                    set_type = "val",
+                    transform = data_transform,
+                    target_transform = target_transform,
+                    merge_small_items=merge_small_items,
+                    remove_small_items=remove_small_items)
 ```
-before doing any import of the am4ip library.
+In addition, the data augmentation is commented out:
+```python
+data_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Resize((256, 256)),
+    # transforms.RandomCrop((64,64), padding=None, pad_if_needed=True, fill=0, padding_mode='constant'),
+    # transforms.RandomRotation((1, 359)),
+    # transforms.RandomChoice([AddGaussianNoise(0., 0.05),AddSaltandPepperNoise(0.5)])
+    ])
 
-One can also configure its IDE for the project.
+target_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Resize((256, 256)),
+    # transforms.RandomCrop((64,64), padding=None, pad_if_needed=True, fill=0, padding_mode='constant'),
+    # transforms.RandomRotation((1, 359))
+    ])
+```
+The model can be changed in line 46 and 47:
+```python
+name = "U-Net_resnet50_lr_0.001_loss_Focal Loss"
+PATH = f"./model/{name}.pth"
+```
+U-Net, Auto-Encoder, DeepLabV3, and FCN. Model can be chosen in the corresponsing line 42 and 43: 
+```python
+model_name = "U-Net"
+backbone = 'resnet50'
+```
+The model_name can be "U-Net", "DeepLabV3", and "FCN".
 
-### In Pycharm:
-- right Click on the src folder
-- Mark Directory as > Sources Root
-# test
-# test
+When the code is run, it will first return the information of the model's state, followed by the optizer's state, and the metric score. 

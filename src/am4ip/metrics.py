@@ -22,9 +22,7 @@ class Metric(ABC):
                 if self.use_cuda:
                     x = x.cuda()
                     attr = attr.cuda()
-
                 out = self.batch_compute([x, attr], model)
-                # print(out)
                 cumulative_score += out.sum(dim=0)
                 n_batch += 1.
 

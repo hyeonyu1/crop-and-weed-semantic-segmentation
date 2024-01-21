@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
+from torchvision import models
 from collections import OrderedDict# Diff models
 '''
 Auto-encoders
@@ -170,5 +171,72 @@ class AutoEncoder(nn.Module):
         x = self.out(x)
         # print(x.shape)
         return x
+
+
+# pre-trained models using resnet50 or resnet101 backbone 
+# DeepLabV3
+# FCN 
+# UNET (again to compare our trained unet to pre-trained ?)
+
+class DeepLabV3(nn.Module):
+    def __init__(self, in_channel, n_classes, backbone = 'resnet50'):
+        super(DeepLabV3, self).__init__()
+
+        # backbone selection
+        if backbone == 'resnet50':
+            self.deeplab = models.segmentation.deeplabv3_resnet50(pretrained=True, progress=True)
+        
+        elif backbone == 'resnet101':
+            self.deeplab = models.segmentation.deeplabv3_resnet101(pretrained=True, progress=True) 
+        else:
+            print("Supported backbones: resnet50, resnet101")
+
+        # adjust input channels to our images
+        self.deeplab.backbone.conv1 = nn.Conv2d(
+            in_channel, self.deeplab.backbone.conv1.out_channels,
+            kernel_size=3, stride=2, padding=1, bias=False
+        )
+        # change output channels to our number of classes
+        self.deeplab.classifier[-1] = nn.Conv2d(
+            self.deeplab.classifier[-1].in_channels, n_classes,
+            kernel_size=1
+        )
+            
+    def forward(self, x):
+        return self.deeplab(x)
+    
+
+
+class FCN(nn.Module):
+    def __init__(self, in_channel,n_classes, backbone = 'resnet50'):
+        super(FCN,self).__init__()
+
+        #backbone selection
+        if backbone == 'resnet50':
+            self.backbone = models.segmentation.fcn_resnet50(pretrained=True, progress=True)
+        elif backbone == 'resnet101':
+            self.backbone = models.segmentation.fcn_resnet101(pretrained=True, progress=True)
+        else:
+            print("Supported backbones: resnet50, resnet101")
+
+        # adjust input channels
+        self.backbone.backbone.conv1 = nn.Conv2d(
+            in_channel, self.backbone.backbone.conv1.out_channels,
+            kernel_size=7, stride=2, padding=3, bias=False
+        )
+
+        # change output channel
+        self.backbone.classifier[4] = nn.Conv2d(
+            self.backbone.classifier[4].in_channels, n_classes,
+            kernel_size=1
+        )
+    
+    def forward(self,x):
+        return self.backbone(x)
+
+
+
+
+    
 
 

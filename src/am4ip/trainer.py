@@ -55,12 +55,13 @@ class BaselineTrainer:
             epoch: int,
             metrics: List[Metric],
             name: str):
-        avg_loss = 0.
+        
         self.model.training = True
         logger = open(f'./avg_loss/{name}.txt', 'a')
 
         for e in range(epoch):
             print(f"Start epoch {e+1}/{epoch}")
+            avg_loss = 0.
             n_batch = 0
             for i, (ref_img, dist_img) in enumerate(train_data_loader):
                 # Reset previous gradients
@@ -75,7 +76,7 @@ class BaselineTrainer:
                 output = self.model.forward(ref_img)
                 if isinstance(output, dict):
                     output = self.model.forward(ref_img)["out"]
-
+                
                 loss = self.loss(output, dist_img, self.use_cuda)
                 loss.backward()
 
@@ -89,7 +90,7 @@ class BaselineTrainer:
                 print(f"\r{i+1}/{len(train_data_loader)}: loss = {loss / n_batch}", end='')
             
                 # avg_loss=1
-            logger.write(f"Avg loss = {avg_loss/(len(train_data_loader))}\n")
+            logger.write(f"Epoch: {e} Avg loss = {avg_loss/(len(train_data_loader))}\n")
 
             if self.early_stopper.check(0.01):
                 print(f"\nEarly stoppage")

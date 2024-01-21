@@ -26,7 +26,9 @@ def config(builtin,
             optimizer="SGD",
             momentum=0.9,
             batchnorm=False, 
-            bilinear=False,):
+            bilinear=False,
+            backbone = "resnet50",
+            use_cuda_metrics=True):
 
     config={}
         
@@ -44,6 +46,17 @@ def config(builtin,
                                                 ds.get_class_number(),
                                                 batchnorm,
                                                 bilinear)
+            elif model == "DeepLabV3":
+                loaded_model = models.DeepLabV3(in_channel,
+                                                ds.get_class_number(),
+                                                backbone
+                                                )
+                
+            elif model == "FCN":
+                loaded_model = models.FCN(in_channel,
+                                          ds.get_class_number(),
+                                          backbone)
+
             else:
                 raise ValueError(f"The given model, {model} is not implemented")
         else:
@@ -62,6 +75,8 @@ def config(builtin,
         print(f"Using optimizer: {optimizer}")
         if optimizer == "SGD":
             optimizer = torch.optim.SGD(loaded_model.parameters(), lr=lr, momentum=momentum)
+        if optimizer == "Adam":
+            optimizer = torch.optim.Adam(loaded_model.parameters(), lr=lr)
     config["optimizer"] = optimizer
     
     if train:
@@ -86,11 +101,11 @@ def config(builtin,
         else:
             print(f"Using metrics: {t}")
             if t == "DICE":
-                metric.append(m.DICE())
+                metric.append(m.DICE(use_cuda=use_cuda_metrics))
             if t == "Mean IoU":
-                metric.append(m.MIOU())
+                metric.append(m.MIOU(use_cuda=use_cuda_metrics))
             if t == "Mean Pixel Acc":
-                metric.append(m.PixACC())
+                metric.append(m.PixACC(use_cuda=use_cuda_metrics))
 
     config["metrics"] = metric
 

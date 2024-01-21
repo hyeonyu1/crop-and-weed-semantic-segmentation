@@ -9,8 +9,7 @@ from torchvision.models.segmentation import fcn_resnet50
 import random
 from torchvision.utils import save_image
 import matplotlib.pyplot as plt
-
-
+from script.noise import AddGaussianNoise, AddSaltandPepperNoise
 '''
 Need to do!
 - data analysis (EDA)
@@ -19,11 +18,11 @@ Need to do!
 
 '''
 
+
 def main():
     # option = "EDA"
     option = "Train"
     # option = "Eval"
-
 
     if option == "EDA":
         EDA_dataset = ds.CropSegmentationDataset(
@@ -35,34 +34,56 @@ def main():
         
     # set up configuration
     
-    if option == "Train":
+    elif option == "Train":
         train = True
     else:
         train = False
 
     # Create Config
-    data_transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Resize((512, 512))])
-    target_transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Resize((512, 512))])
     # data_transform = transforms.Compose([
     #     transforms.ToTensor(),
-    #     transforms.Resize((32, 32))])
+    #     transforms.Resize((512, 512))])
     # target_transform = transforms.Compose([
     #     transforms.ToTensor(),
-    #     transforms.Resize((32, 32))])
-    merge_small_items = False
-    remove_small_items = False
+    #     transforms.Resize((512, 512))])
 
-    batch_size = 6
+
+    data_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Resize((256, 256)),
+        # transforms.RandomCrop((64,64), padding=None, pad_if_needed=True, fill=0, padding_mode='constant'),
+        # transforms.RandomRotation((1, 359)),
+        # transforms.RandomChoice([AddGaussianNoise(0., 0.05),AddSaltandPepperNoise(0.5)])
+        ])
+
+    target_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Resize((256, 256)),
+        # transforms.RandomCrop((64,64), padding=None, pad_if_needed=True, fill=0, padding_mode='constant'),
+        # transforms.RandomRotation((1, 359))
+        ])
+
+    # data_transform = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.Resize((256, 256))])
+    # target_transform = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.Resize((256, 256))])
+    merge_small_items = False
+    remove_small_items = True
+
+    batch_size = 10
     epochs = 20
     
-    loss = ["Pixel-Wise Cross-Entropy", "Focal Loss"]
-    metrics = ["Mean Pixel Acc", "Mean IoU", "DICE"]
-    learing_rate = [0.1, 0.01, 0.001, 0.0001]
-    optimizer_name = "SGD"
+    # loss = ["Pixel-Wise Cross-Entropy", "Focal Loss"]
+    loss = ["Focal Loss"]
+
+    metrics = ["DICE"]
+    # metrics = ["Mean Pixel Acc", "Mean IoU", "DICE"]
+    # learing_rate = [0.1, 0.01, 0.001, 0.0001]
+    # learing_rate = [1e-1,1e-2,1e-4]
+    learing_rate = [1e-3]
+    optimizer_name = "Adam"
     dataset = ds.CropSegmentationDataset(
                         transform=data_transform,
                         target_transform=target_transform,
@@ -77,8 +98,10 @@ def main():
     val_dataset = DataLoader(val_loader, batch_size=batch_size, shuffle=False)
     in_channel = dataset.__getitem__(0)[0].shape[0]
     model_name = "U-Net"
+    backbone = 'resnet50'
     builtin = False
-    file_name = "U-Net"
+    
+    file_name = f"aa_{model_name}_{backbone}"
     # model_name =  fcn_resnet50(num_classes=in_channel, progress=False)
     for lr in learing_rate:
         for l in loss:
@@ -99,6 +122,7 @@ def main():
                     momentum=0.9,
                     batchnorm=True, 
                     bilinear=False,
+                    backbone=backbone
                     )
 
             if train:
